@@ -132,7 +132,10 @@ static Evaluation twoPhaseSatKrn(const Params& params, const Evaluation& Sw)
 
 # How to build 
 To build the packages,
+
+```
 $ source dune_and_opm_in_macOS.bash
+```
 
 # How to run an example
 
