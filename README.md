@@ -141,9 +141,9 @@ $ source dune_and_opm_in_macOS.bash
 
 To run the example, generate the example models and then run examples from opm-models :
 
-```
 Generate ml models and loading in opm-common
 
+```
 $ cd opm-common/opm/material/fluidmatrixinteractions/ml_tools/
 $ python make_model_BCkrn.py
 $ python make_model_BCkrw.py
@@ -151,13 +151,13 @@ $ python make_model_VGkrn.py
 $ python make_model_VGkrw.py
 $ cd ../../../../../
 ...
-
+```
 Run a practical example from opm-models
 
+```
 $ cd build/opm-models 
 $ make lens_immiscible_ecfv_ad 
 
 $ ./bin/lens_immiscible_ecfv_ad 
-
-
+```
 
