@@ -14,7 +14,7 @@ Design goals:
 
 # Example
 
-make_model.py:
+make_model_BCkrn.py:
 
 ```
 from sklearn.preprocessing import MinMaxScaler
@@ -132,42 +132,26 @@ static Evaluation twoPhaseSatKrn(const Params& params, const Evaluation& Sw)
 
 
 
-# Unit tests
+# Example
 
-To run the unit tests, generate the unit test models and then run `keras_model_test`:
+To run the example, generate the example models and then run examples from opm-models :
 
 ```
-$ python make_tests.py
+Generate ml models and loading in opm-common
+$ cd opm-common/opm/material/fluidmatrixinteractions/ml_tools/
+$ python make_model_BCkrn.py
+$ python make_model_BCkrw.py
+$ python make_model_VGkrn.py
+$ python make_model_VGkrw.py
+$ cd ../../../../../
 ...
 
-$ make
-cppcheck --error-exitcode=1 keras_model.cc
-Checking keras_model.cc...
-Checking keras_model.cc: DEBUG...
-g++ --std=c++11 -I. -Wall -Werror -MMD -O3 -mtune=core2 -o keras_model.o -c keras_model.cc
-cppcheck --error-exitcode=1 keras_model_test.cc
-Checking keras_model_test.cc...
-Checking keras_model_test.cc: DEBUG...
-g++ --std=c++11 -I. -Wall -Werror -MMD -O3 -mtune=core2 -o keras_model_test.o -c keras_model_test.cc
-g++ -o keras_model_test keras_model_test.o keras_model.o
+Run a practical example from opm-models
 
-$ ./keras_model_test
-TEST dense_1x1
-TEST dense_10x1
-TEST dense_2x2
-TEST dense_10x10
-TEST dense_10x10x10
-TEST conv_2x2
-TEST conv_3x3
-TEST conv_3x3x3
-TEST elu_10
-TEST benchmark
-TEST benchmark
-TEST benchmark
-TEST benchmark
-TEST benchmark
-Benchmark network loads in 0.022415s
-Benchmark network runs in 0.022597s
-```
+$ cd build/opm-models 
+$ make lens_immiscible_ecfv_ad 
+
+$ ./bin/lens_immiscible_ecfv_ad 
+
 
 
