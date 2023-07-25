@@ -150,7 +150,6 @@ $ python make_model_BCkrw.py
 $ python make_model_VGkrn.py
 $ python make_model_VGkrw.py
 $ cd ../../../../../
-...
 ```
 Run a practical example from opm-models
 
