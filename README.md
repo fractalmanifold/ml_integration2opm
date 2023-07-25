@@ -60,14 +60,7 @@ int main() {
 }
 ```
 
-To test:
 
-    $ python make_model.py
-    [[-1.85735667]]
-
-    $ g++ --std=c++11 -Wall -O3 test.cc keras_model.cc
-    $ ./a.out 
-    [ -1.857357 ]
 
 # Unit tests
 
@@ -107,6 +100,4 @@ Benchmark network loads in 0.022415s
 Benchmark network runs in 0.022597s
 ```
 
-# License
 
-MIT 
