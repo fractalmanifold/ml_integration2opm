@@ -1,3 +1,5 @@
+mkdir ml2OPM && cd ml2OPM
+
 CURRENT_DIRECTORY="$PWD"
 
 # Dune modules
