@@ -11,8 +11,16 @@ do   ./dune-common/bin/dunecontrol --only=dune-$module cmake -DCMAKE_DISABLE_FIN
      ./dune-common/bin/dunecontrol --only=dune-$module make -j10
 done
 
+
+# OPM common from forked ml repo
+for repo in common 
+do
+    git -c http.sslVerify=false clone https://github.com/fractalmanifold/opm-$repo.git
+done
+
+
 # OPM modules
-for repo in common grid models simulators
+for repo in grid models simulators
 do
     git -c http.sslVerify=false clone https://github.com/OPM/opm-$repo.git
 done
