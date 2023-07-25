@@ -1,6 +1,6 @@
-# Kerasify
+# ML integration in OPM
 
-Kerasify is a small library for running trained Keras models from a C++ application. 
+Work based on Kerasify a small library for running trained Keras models from a C++ application. 
 
 Design goals:
 
@@ -10,53 +10,123 @@ Design goals:
 * Model stored on disk in binary format that can be quickly read.
 * Model stored in memory in contiguous block for better cache performance.
 * Doesn't throw exceptions, returns only bool on error.
-* Unit testable, rigorous unit tests.
 
-Looking for more Keras/C++ libraries? Check out https://github.com/pplonski/keras2cpp/
 
 # Example
 
 make_model.py:
 
 ```
-import numpy as np
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import mean_squared_error
 from keras.models import Sequential
 from keras.layers import Dense
+from numpy import asarray
+from matplotlib import pyplot
+import numpy as np
+import pandas as pd
+  
+def computeBCKrn(satW, lambdaparam):
+  Sn = 1.0 - satW;
+  exponent = 2.0/lambdaparam + 1.0
+  kr = Sn*Sn*(1. - pow(satW, exponent))
+  return kr
 
-test_x = np.random.rand(10, 10).astype('f')
-test_y = np.random.rand(10).astype('f')
+sw = np.linspace(0, 1, 10001).reshape( (10001, 1) )
 
+lambdaparam = 2
+
+#BCKrw = computeBCKrw(sw, lambdaparam)
+BCKrn = computeBCKrn(sw, lambdaparam)
+
+# define the dataset
+x = sw
+# x = asarray([i for i in range(-50,51)])
+y = np.array([BCKrn])
+
+print(x.min(), x.max(), y.min(), y.max())
+# reshape arrays into into rows and cols
+x = x.reshape((len(x), 1))
+y = y.reshape((10001, 1))
+# separately scale the input and output variables
+scale_x = MinMaxScaler()
+x = scale_x.fit_transform(x)
+scale_y = MinMaxScaler()
+y = scale_y.fit_transform(y)
+print(x.min(), x.max(), y.min(), y.max())
+# design the neural network model
 model = Sequential()
-model.add(Dense(1, input_dim=10))
+model.add(Dense(3, input_dim=1, activation='relu', kernel_initializer='he_uniform'))
+# model.add(Dense(10, activation='relu', kernel_initializer='he_uniform'))
+model.add(Dense(10, activation='relu', kernel_initializer='he_uniform'))
+model.add(Dense(10, activation='relu', kernel_initializer='he_uniform'))
+model.add(Dense(10, activation='relu', kernel_initializer='he_uniform'))
+model.add(Dense(10, activation='relu', kernel_initializer='he_uniform'))
+model.add(Dense(10, activation='relu', kernel_initializer='he_uniform'))
+# model.add(Dense(1000, activation='relu', kernel_initializer='he_uniform'))
 
-model.compile(loss='mean_squared_error', optimizer='adamax')
-model.fit(test_x, test_y, nb_epoch=1, verbose=False)
+model.add(Dense(1))
+# define the loss function and optimization algorithm
+model.compile(loss='mse', optimizer='adam')
+# ft the model on the training dataset
+model.fit(x, y, epochs=1000, batch_size=100, verbose=0)
+# make predictions for the input data
+yhat = model.predict(x)
+# inverse transforms
+x_plot = scale_x.inverse_transform(x)
+y_plot = scale_y.inverse_transform(y)
+yhat_plot = scale_y.inverse_transform(yhat)
+# report model error
+print('MSE: %.3f' % mean_squared_error(y_plot, yhat_plot))
+print(yhat_plot)
+print('blah: %.3f' % mean_squared_error(y_plot, yhat_plot))
 
-print model.predict(np.array([[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]]))
-
+#save model
+#from keras2cpp import export_model
+#export_model(model, 'example.model')
 from kerasify import export_model
-export_model(model, 'example.model')
-```
-
-test.cc:
+export_model(model, 'example.modelBCkrn')
 
 ```
-#include "keras_model.h"
 
-int main() {
-    // Initialize model.
+opm-common/opm/material/fluidmatrixinteractions/BrooksCorey.hpp:
+
+```
+#include "ml_tools/keras_model.h"
+#include "ml_tools/keras_model.cc"
+
+template <class Evaluation>
+static Evaluation twoPhaseSatKrn(const Params& params, const Evaluation& Sw)
+{
+    assert(0.0 <= Sw && Sw <= 1.0);
+
+
     KerasModel model;
-    model.LoadModel("example.model");
-
-    // Create a 1D Tensor on length 10 for input data.
-    Tensor in(10);
-    in.data_ = {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}};
-
+    // Beware of the correct path (we are working in opm-model/test in the current case)
+    model.LoadModel("../../opm-common/opm/material/fluidmatrixinteractions/ml_tools/example.modelBCkrn");
+    Tensor in{1};
+    const Evaluation temp = Sw;
+    in.data_ = {temp};
+    // bba
     // Run prediction.
     Tensor out;
     model.Apply(&in, &out);
-    out.Print();
-    return 0;
+    //
+    Scalar exponent = 2.0/params.lambda() + 1.0;
+    const Evaluation Sn = 1.0 - Sw;
+    auto exactsol = Sn*Sn*(1. - pow(Sw, exponent));
+
+    Evaluation result= 0.0;
+
+    if (out.data_[0].value() <= 1.e-50)
+      result= exactsol;
+    else if (out.data_[0].value() > 0.99) {
+      result= exactsol;
+    }
+    else
+      result=out.data_[0].value();
+
+    return result;
 }
 ```
 
