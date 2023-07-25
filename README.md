@@ -12,7 +12,7 @@ Design goals:
 * Doesn't throw exceptions, returns only bool on error.
 
 
-# Example
+# ML model using Keras
 
 make_model_BCkrn.py:
 
@@ -138,6 +138,7 @@ To run the example, generate the example models and then run examples from opm-m
 
 ```
 Generate ml models and loading in opm-common
+
 $ cd opm-common/opm/material/fluidmatrixinteractions/ml_tools/
 $ python make_model_BCkrn.py
 $ python make_model_BCkrw.py
